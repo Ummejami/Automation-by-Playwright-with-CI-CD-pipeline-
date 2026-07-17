@@ -1,0 +1,50 @@
+import { Page, Locator } from '@playwright/test';
+
+export class CheckoutPage {
+  readonly page: Page;
+
+  // Step One: Shipping information form
+  readonly firstNameInput: Locator;
+  readonly lastNameInput: Locator;
+  readonly postalCodeInput: Locator;
+  readonly continueButton: Locator;
+  readonly stepOneError: Locator;
+
+  // Step Two: Overview
+  readonly finishButton: Locator;
+  readonly cancelButton: Locator;
+
+  // Complete
+  readonly completeHeader: Locator;
+  readonly backHomeButton: Locator;
+
+  constructor(page: Page) {
+    this.page = page;
+
+    this.firstNameInput = page.locator('#first-name');
+    this.lastNameInput = page.locator('#last-name');
+    this.postalCodeInput = page.locator('#postal-code');
+    this.continueButton = page.locator('#continue');
+    this.stepOneError = page.locator('[data-test="error"]');
+
+    this.finishButton = page.locator('#finish');
+    this.cancelButton = page.locator('#cancel');
+
+    this.completeHeader = page.locator('.complete-header');
+    this.backHomeButton = page.locator('#back-to-products');
+  }
+
+  async fillShippingInfo(firstName: string, lastName: string, postalCode: string): Promise<void> {
+    await this.firstNameInput.fill(firstName);
+    await this.lastNameInput.fill(lastName);
+    await this.postalCodeInput.fill(postalCode);
+  }
+
+  async continueToOverview(): Promise<void> {
+    await this.continueButton.click();
+  }
+
+  async finishOrder(): Promise<void> {
+    await this.finishButton.click();
+  }
+}

@@ -1,0 +1,29 @@
+import { Page, Locator } from '@playwright/test';
+
+export class CartPage {
+  readonly page: Page;
+  readonly cartItems: Locator;
+  readonly cartItemName: Locator;
+  readonly cartItemPrice: Locator;
+  readonly checkoutButton: Locator;
+
+  constructor(page: Page) {
+    this.page = page;
+    this.cartItems = page.locator('.cart_item');
+    this.cartItemName = page.locator('.cart_item .inventory_item_name');
+    this.cartItemPrice = page.locator('.cart_item .inventory_item_price');
+    this.checkoutButton = page.locator('#checkout');
+  }
+
+  async getItemCount(): Promise<number> {
+    return this.cartItems.count();
+  }
+
+  async getFirstItemPriceText(): Promise<string> {
+    return this.cartItemPrice.first().innerText();
+  }
+
+  async proceedToCheckout(): Promise<void> {
+    await this.checkoutButton.click();
+  }
+}

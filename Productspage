@@ -1,0 +1,62 @@
+import { Page, Locator, expect } from '@playwright/test';
+
+export class ProductsPage {
+  readonly page: Page;
+  readonly inventoryList: Locator;
+  readonly inventoryItems: Locator;
+  readonly cartIcon: Locator;
+  readonly cartBadge: Locator;
+  readonly pageTitle: Locator;
+
+  constructor(page: Page) {
+    this.page = page;
+    this.inventoryList = page.locator('.inventory_list');
+    this.inventoryItems = page.locator('.inventory_item');
+    this.cartIcon = page.locator('.shopping_cart_link');
+    this.cartBadge = page.locator('.shopping_cart_badge');
+    this.pageTitle = page.locator('.title');
+  }
+
+  /**
+   * Scans all inventory items on the page and returns the single
+   * .inventory_item container whose price matches targetPrice exactly.
+   * No product name or index is hardcoded.
+   */
+  async findItemByPrice(targetPrice: number): Promise<Locator> {
+    const count = await this.inventoryItems.count();
+    const matches: Locator[] = [];
+
+    for (let i = 0; i < count; i++) {
+      const item = this.inventoryItems.nth(i);
+      const priceText = await item.locator('.inventory_item_price').innerText();
+      // priceText looks like "$15.99" -> strip "$" and parse
+      const price = parseFloat(priceText.replace('$', '').trim());
+
+      if (price === targetPrice) {
+        matches.push(item);
+      }
+    }
+
+    if (matches.length === 0) {
+      throw new Error(`No product found with price $${targetPrice.toFixed(2)}`);
+    }
+
+    // Return the first match (list itself asserts uniqueness upstream if needed)
+    return matches[0];
+  }
+
+  /**
+   * Returns the "Add to cart" / "Remove" button scoped to a given item locator.
+   */
+  getAddToCartButton(item: Locator): Locator {
+    return item.locator('button');
+  }
+
+  async getItemName(item: Locator): Promise<string> {
+    return item.locator('.inventory_item_name').innerText();
+  }
+
+  async goToCart(): Promise<void> {
+    await this.cartIcon.click();
+  }
+}
